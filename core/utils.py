@@ -56,7 +56,7 @@ def recognize_plate(img, coords):
     percentage = 0
     length = len(test[0])
     width = len(test)
-    print(length,width)
+    #print(length,width)
     for i in range(width):
         percentage = 0
         for j in range(length):
@@ -81,13 +81,52 @@ def recognize_plate(img, coords):
     cv2.imshow("test",test)
     text1 = pytesseract.image_to_string(test, lang = "tha",config="--psm 11")
     print(text1)
-    splitted_text = re.split("[\W\n]",text1)
+    #splitted_text = re.split("[\W\n]",text1)
+    new_text = re.sub('[\W_]+', '', text1)
     clean_text = ""
-    for e in splitted_text:
-        if any(char.isdigit() for char in e):
-            clean_text += e
-        elif len(e)==2 and all(char in "ภถคตจขชฎพฑธณรนยญบฐลฃฅฟฤหฆกฏดฌษศสวซงผปฉฮอทมฒฬฝฦ" for char in e) and len(clean_text) < 3:
-            clean_text += e
+    print(new_text)
+
+    ###
+    #try new solution
+    ###
+    num_ind = []
+    for i,e in enumerate(new_text):
+        if e.isdigit():
+            num_ind.append(i)
+    last_ind = -1
+    if len(num_ind)>1:
+        try:
+            #case: there is one number in front of 2 thai char or 1 thai char
+           # print(int(num_ind[1]) - int(num_ind[0]))
+            dif = int(num_ind[1]) - int(num_ind[0])
+            if dif == 3 or dif == 2:
+                clean_text = new_text[int(num_ind[0]):int(num_ind[-1])+1]
+            else:#case: there is no number in front of thai char
+                last_ind = int(num_ind[0])
+                first_ind = int(num_ind[0])
+                for pos in num_ind[1:]:
+                    if int(pos)-last_ind == 1:
+                        last_ind = int(pos)
+                clean_text = new_text[first_ind-2:last_ind+1]
+
+        except:
+            print("error :(")
+            
+    print(num_ind)
+
+
+
+
+    ####
+    #for some reason the output is different hen change to notebook
+    ####
+    # for e in splitted_text:
+    #     if any(char.isdigit() for char in e):
+    #         clean_text += e
+    #     elif len(e)==2 and all(char in "ภถคตจขชฎพฑธณรนยญบฐลฃฅฟฤหฆกฏดฌษศสวซงผปฉฮอทมฒฬฝฦ" for char in e) and len(clean_text) < 3:
+    #         clean_text += e
+    #     elif len(e)==1 and (e in "ภถคตจขชฎพฑธณรนยญบฐลฃฅฟฤหฆกฏดฌษศสวซงผปฉฮอทมฒฬฝฦ"):
+    #         pass
 
     print("clean "+clean_text)
    
