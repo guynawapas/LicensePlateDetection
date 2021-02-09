@@ -90,8 +90,9 @@ def recognize_plate(img, coords):
     #try new solution
     ###
     num_ind = []
+    number = "0123456789"
     for i,e in enumerate(new_text):
-        if e.isdigit():
+        if e in number:
             num_ind.append(i)
     last_ind = -1
     if len(num_ind)>1:
